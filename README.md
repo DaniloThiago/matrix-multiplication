@@ -132,3 +132,11 @@ a) Qual o motivo dos resultados obtidos no experimento E1? O que pode ter causad
 b) Qual o motivo dos resultados obtidos no experimento E2? O que pode ter causado o comportamento observado?
 
 c) Qual é o valor de P ideal para a multiplicação das matrizes M1 e M2? Justifique sua resposta através dos experimentos realizados.
+
+## Comando para funcionamento do projeto
+~~~c
+Ubuntu on Windows:
+apt install gcc
+gcc auxiliar.c -o auxiliar
+./auxiliar 2 2 3 3
+~~~  
