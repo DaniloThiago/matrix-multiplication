@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     fprintf(file1, "%d %d\n", x1, y1); // primeira linha exibindo o tamanho da matriz
     for (int i = 0; i < x1; i++) {
         for (int j = 0; j < y1; j++) {
-            fprintf(file1, "%d ", rand() % 100); // escreve um elemento aleatório no arquivo entre 0 e 99
+            fprintf(file1, "%d ", rand() % 90 + 10); // escreve um elemento aleatório no arquivo entre 0 e 99
         }
         fprintf(file1, "\n"); // nova linha para cada linha da matriz
     }
@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     fprintf(file2, "%d %d\n", x2, y2);
     for (int i = 0; i < x2; i++) {
         for (int j = 0; j < y2; j++) {
-            fprintf(file2, "%d ", rand() % 100);
+            fprintf(file2, "%d ", rand() % 90 + 10);
         }
         fprintf(file2, "\n");
     }
