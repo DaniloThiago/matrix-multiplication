@@ -2,66 +2,71 @@
 #include <stdlib.h>
 #include <time.h>
 
-int main(int argc, char *argv[]){
-	int l1,c1,l2,c2,mult;
-	if(argc != 3){
-		printf("Informe o tamanho das matrizes M1 e M2: %s x1 y1 x2 y2 \n", argv[0]);
-		return 1;
-	}
+int main(int argc, char *argv[]) {
+    int l1, c1, l2, c2;
 
-	//abre os arquivos recebidos na linha de comando
-	FILE *matriz1 = fopen(argv[1], "r");
-	FILE *matriz2 = fopen(argv[1], "r");
+    // abre os arquivos
+    FILE *matriz1 = fopen(argv[1], "r");
+    FILE *matriz2 = fopen(argv[2], "r");
 
-	//le o tamanho da matriz
-	fscanf(matriz1, "%d %d", &l1, &c1);
-	fscanf(matriz2, "%d %d", &l2, &c2);
+    // le o tamanho
+    fscanf(matriz1, "%d %d", &l1, &c1);
+    fscanf(matriz2, "%d %d", &l2, &c2);
 
-	// aqui eu usarei um vetor para armazenar os valores da matriz
-	mult = l1 * c1;
-	int vet1[mult];
-	int vet2[mult];
-	for(int i = 0; i <= mult; i++){
-		fscanf(matriz1, "%d", vet1);
-		fscanf(matriz2, "%d", vet2);
-	}
+    // aloca matriz
+    int **new_matriz1 = (int **) malloc(l1 * sizeof(int *));
+    int **new_matriz2 = (int **) malloc(l2 * sizeof(int *));
+    int **resultado = (int **) malloc(l1 * sizeof(int *));
 
-	//aqui gravo os valores que etsão armazenados no vetor em uma matriz
-	int new_matriz1[l1][c1], new_matriz2[l2][c2], resultado[l1][c1];
-	for(int i = 0; i < l1; i++){
-		for(int j = 0; j < c1; j++){
-			fscanf(matriz1, "%d", new_matriz1[i][j]);
-			fscanf(matriz2, "%d", new_matriz2[i][j]);
-		}
-	}
+    for (int i = 0; i < l1; i++) {
+        new_matriz1[i] = (int *) malloc(c1 * sizeof(int));
+        resultado[i] = (int *) malloc(c2 * sizeof(int));
+    }
 
-	//multiplicação
-	clock_t inicia = clock();
-	for(int i = 0; i < l1; i++){
-		for(int j = 0; j < c1; j++){
-			resultado[i][j] = 0;
-			for(int k = 0; k <= l1; l1++){
-				resultado[i][j] += new_matriz1[i][k] * new_matriz2[i][j];
-			}
-		}
-	}
-	clock_t fim = clock();
-	//calculo de tempo
-	double tempo = (double)(fim - inicia)/ CLOCKS_PER_SEC;
+    for (int i = 0; i < l2; i++) {
+        new_matriz2[i] = (int *) malloc(c2 * sizeof(int));
+    }
 
-	fclose(matriz1);
-	fclose(matriz2);
+    // leitura das matrizes
+    for (int i = 0; i < l1; i++) {
+        for (int j = 0; j < c1; j++) {
+            fscanf(matriz1, "%d", &new_matriz1[i][j]);
+        }
+    }
 
-	//gravando o resultado em outro arquivo
-	FILE *saida = fopen("saida.txt","w");
-	for(int i = 0; i < l1; i++){
-		for(int j = 0; j < c1; j++){
-			fprintf(saida, "%d", resultado[i][j]);
-		}
-		fprintf(saida, "\n");
-	}
-	fprintf(saida, "%f", tempo);
-	fclose(saida);
+    for (int i = 0; i < l2; i++) {
+        for (int j = 0; j < c2; j++) {
+            fscanf(matriz2, "%d", &new_matriz2[i][j]);
+        }
+    }
 
-	return 0;
+    // multiplicação
+    clock_t inicia = clock();
+    for (int i = 0; i < l1; i++) {
+        for (int j = 0; j < c2; j++) {
+            resultado[i][j] = 0;
+            for (int k = 0; k < c1; k++) {
+                resultado[i][j] += new_matriz1[i][k] * new_matriz2[k][j];
+            }
+        }
+    }
+    clock_t fim = clock();
+
+    // cálculo de tempo
+    double tempo = (double)(fim - inicia) / CLOCKS_PER_SEC;
+
+    // gravação do resultado em outro arquivo
+    FILE *saida = fopen("saida.txt", "w");
+    fprintf(saida, "%d %d\n", l1, c2);  // tamanho da matriz resultante
+
+    for (int i = 0; i < l1; i++) {
+        for (int j = 0; j < c2; j++) {
+            fprintf(saida, "%d %d %d\n", i, j, resultado[i][j]);  // posição linha, coluna e valor
+        }
+    }
+
+    fprintf(saida, "%.6f", tempo);  // tempo de execução
+    fclose(saida);
+	
+return 0;
 }
