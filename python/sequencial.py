@@ -11,47 +11,42 @@ arquivo2 = sys.argv[2]
 arquivo3 = sys.argv[3]
 
 # leitura da matriz 1
-with open(arquivo1, "r") as f:
-  # leitura do tamanho da matriz
-  m, n = map(int, f.readline().split())
-  # inicialização da matriz
-  M1 = [[0 for j in range(n)] for i in range(m)]
-  # leitura dos elementos
-  for i in range(m):
-    for j in range(n):
-      line = f.readline().split()
-      # preenchimento da matriz
-      M1[i][j] = int(line[1])
+def le_matriz_arquivo(filename):
+  with open(filename, "r") as f:
+    # leitura do tamanho da matriz
+    l, c = map(int, f.readline().split())
+    # inicialização da matriz
+    M = [[0 for j in range(c)] for i in range(l)]
+    # leitura dos elementos
+    for i in range(l):
+      for j in range(c):
+        line = f.readline().split()
+        # preenchimento da matriz
+        M[i][j] = int(line[1])
+  return M
 
-# leitura da matriz 2
-with open(arquivo2, "r") as f:
-  # leitura do tamanho da matriz
-  p, q = map(int, f.readline().split())
-  # inicialização da matriz
-  M2 = [[0 for j in range(q)] for i in range(p)]
+M1 = le_matriz_arquivo(arquivo1)
+M2 = le_matriz_arquivo(arquivo2)
 
-  # leitura dos elementos
-  for i in range(p):
-    for j in range(q):
-      line = f.readline().split()
-      # preenchimento da matriz
-      M2[i][j] = int(line[1])
-
+# Verifica se as matrizes são compatíveis para a multiplicação
+if len(M1) != len(M2):
+  print("Matrizes não são compatíveis para a multiplicação")
+  sys.exit()
+  
 # cálculo da matriz resultante
 t0 = time.time()
-M3 = [[0 for j in range(q)] for i in range(m)]
-for i in range(m):
-    for j in range(q):
-        for k in range(n):
+M3 = [[0 for j in range(len(M2[0]))] for i in range(len(M1))]
+for i in range(len(M1)):
+    for j in range(len(M2[0])):
+        for k in range(len(M2)):
             M3[i][j] += M1[i][k] * M2[k][j]
 
 # escrita da matriz resultante
 with open(arquivo3, "w") as f:
-    f.write(f"{m} {q}\n")
-    for i in range(m):
-        for j in range(q):
+    f.write(f"{len(M3)} {len(M3[0])}\n")
+    for i in range(len(M3)):
+        for j in range(len(M3[0])):
             f.write(f"c{i+1}{j+1} {M3[i][j]}\n")
     t1 = time.time()
     f.write(f'{t1-t0:.3f}')
-
 print(f'{t1-t0:.3f}')
