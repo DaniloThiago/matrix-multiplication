@@ -12,37 +12,30 @@ arquivo3 = sys.argv[3]
 
 # leitura da matriz 1
 with open(arquivo1, "r") as f:
-    # leitura do tamanho da matriz
-    m, n = map(int, f.readline().split())
-    # inicialização da matriz
-    M1 = [[0 for j in range(n)] for i in range(m)]
-    # leitura dos elementos
-    i = 0
-    while i < m:
-        j = 0
-        while j < n:
-          line = f.readline().split()
-          # preenchimento da matriz
-          M1[i][j] = int(line[1])
-          j += 1
-        i += 1
+  # leitura do tamanho da matriz
+  m, n = map(int, f.readline().split())
+  # inicialização da matriz
+  M1 = [[0 for j in range(n)] for i in range(m)]
+  # leitura dos elementos
+  for i in range(m):
+    for j in range(n):
+      line = f.readline().split()
+      # preenchimento da matriz
+      M1[i][j] = int(line[1])
 
 # leitura da matriz 2
 with open(arquivo2, "r") as f:
-    # leitura do tamanho da matriz
-    p, q = map(int, f.readline().split())
-    # inicialização da matriz
-    M2 = [[0 for j in range(q)] for i in range(p)]
-    # leitura dos elementos
-    i = 0
-    while i < p:
-        j = 0
-        while j < q:
-          line = f.readline().split()
-          # preenchimento da matriz
-          M2[i][j] = int(line[1])
-          j += 1
-        i += 1
+  # leitura do tamanho da matriz
+  p, q = map(int, f.readline().split())
+  # inicialização da matriz
+  M2 = [[0 for j in range(q)] for i in range(p)]
+
+  # leitura dos elementos
+  for i in range(p):
+    for j in range(q):
+      line = f.readline().split()
+      # preenchimento da matriz
+      M2[i][j] = int(line[1])
 
 # cálculo da matriz resultante
 t0 = time.time()
