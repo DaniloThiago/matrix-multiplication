@@ -44,6 +44,7 @@ def multiplica_parte(M1, M2, q, inicio, fim, m2):
         for j in range(inicio, fim):
             for k in range(len(M2)):
                 M3[i][j-inicio] += M1[i][k] * M2[k][j]
+    print(M3)
     q.put(M3)
 
 # Cria uma fila de threads para executar a multiplicação
@@ -80,6 +81,7 @@ for t in threads:
     t.join()
 
 # Salva os resultados em arquivos separados
+print(arquivos)
 for i in range(partes):
     M3 = q.get()
     with open(arquivos[i], "w") as f:
