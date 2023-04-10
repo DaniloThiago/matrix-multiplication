@@ -18,7 +18,7 @@ def le_matriz_arquivo(filename):
         # leitura do tamanho da matriz
         l, c = map(int, f.readline().split())
         # inicialização da matriz
-        M = [[0 for j in range(c)] for i in range(l)]
+        M = [[0 for _ in range(c)] for _ in range(l)]
         # leitura dos elementos
         for i in range(l):
             for j in range(c):
@@ -32,7 +32,7 @@ M1 = le_matriz_arquivo(arquivo1)
 M2 = le_matriz_arquivo(arquivo2)
 
 # Verifica se as matrizes são compatíveis para a multiplicação
-if len(M1) != len(M2):
+if len(M1[0]) != len(M2):
     print("Matrizes não são compatíveis para a multiplicação")
     sys.exit()
 
