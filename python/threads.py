@@ -1,8 +1,7 @@
 import sys
-import time
-import math
-import queue
+import numpy as np
 import threading
+import time
 
 # leitura dos argumentos
 if len(sys.argv) != 4:
@@ -11,84 +10,98 @@ if len(sys.argv) != 4:
 
 arquivo1 = sys.argv[1]
 arquivo2 = sys.argv[2]
-P = int(sys.argv[3])
 
-# leitura das matrizes
+# Define a quantidade de threads
+p = int(sys.argv[3])
+
 def le_matriz_arquivo(filename):
-    with open(filename, "r") as f:
-        # pega a primeira linha para leitura do tamanho da matriz
-        l, c = map(int, f.readline().split())
-        # inicialização da matriz
-        M = [[0 for _ in range(c)] for _ in range(l)]
-        # leitura dos elementos
-        for i in range(l):
-            for j in range(c):
-                # pega da linha a segunda posição do array ["c12 2"], converte em int e retorna 2
-                value = int(f.readline().split()[1])
-                # preenchimento da matriz
-                M[i][j] = value
-    return M
+  with open(filename, "r") as f:
+      # pega a primeira linha para leitura do tamanho da matriz
+      l, c = map(int, f.readline().split())
+      # inicialização da matriz
+      M = [[0 for _ in range(c)] for _ in range(l)]
+      # leitura dos elementos
+      for i in range(l):
+          for j in range(c):
+              # pega da linha a segunda posição do array ["c12 2"], converte em int e retorna 2
+              value = int(f.readline().split()[1])
+              # preenchimento da matriz
+              M[i][j] = value
+  # Transforma as listas em matrizes NumPy
+  return np.array(M)
 
-M1 = le_matriz_arquivo(arquivo1)
-M2 = le_matriz_arquivo(arquivo2)
+# Define a classe MultiplicationThread
+class MultiplicationThread(threading.Thread):
+    def __init__(self, thread_id, m1, m2, result, num_threads, start_index, end_index):
+        threading.Thread.__init__(self)
+        self.thread_id = thread_id
+        self.m1 = m1
+        self.m2 = m2
+        self.result = result
+        self.num_threads = num_threads
+        self.start_index = start_index
+        self.end_index = end_index
 
-# Verifica se as matrizes são compatíveis para a multiplicação
-if len(M1[0]) != len(M2):
-    print("Matrizes não são compatíveis para a multiplicação")
-    sys.exit()
+    def run(self):
+        # Calcula o intervalo de elementos da matriz resultante que a thread é responsável por calcular
+        chunk_size = (self.end_index - self.start_index) // self.m2.shape[1]
 
-# Função para realizar a multiplicação de uma parte da matriz resultado
-def multiplica_parte(M1, M2, q, inicio, fim, m2):
-    M3 = [[0 for _ in range(m2)] for _ in range(len(M1[0]))]
-    for i in range(len(M1)):
-        for j in range(inicio, fim):
-            for k in range(len(M2)):
-                M3[i][j-inicio] += M1[i][k] * M2[k][j]
-    print(M3)
-    q.put(M3)
+        # Cria o arquivo de texto para a thread
+        with open(f"thread_{self.thread_id+1}.txt", "w") as f:
+            f.write(f"{self.result.shape[0]} {self.result.shape[1]}\n")
+            start_time = time.time()
+            for i in range(self.start_index, self.end_index):
+                row = i // self.m2.shape[1]
+                col = i % self.m2.shape[1]
+                value = sum(self.m1[row][k] * self.m2[k][col] for k in range(self.m1.shape[1]))
+                self.result[row][col] = value
+                f.write(f"c{row+1}{col+1} {value}\n")
+            end_time = time.time()
+            # Escreve o tempo gasto pela thread no final do arquivo de texto
+            f.write(f"{end_time - start_time:.5f}")
 
-# Cria uma fila de threads para executar a multiplicação
+# Define as matrizes M1 e M2
+m1 = le_matriz_arquivo(arquivo1)
+m2 = le_matriz_arquivo(arquivo2)
+
+# Cria a matriz resultante
+result = np.zeros((m1.shape[0], m2.shape[1]))
+
+# Divide a tarefa entre as threads
+chunk_size = result.size // p
+start_index = 0
 threads = []
-q = queue.Queue()
 
-# Define o tamanho de cada parte da matriz resultado
-n1, m2 = len(M1), len(M2[0])
-partes = math.ceil(n1 / P)
-partes = partes * m2
-if partes == 0:
-    partes = m2
+# Calcula o tempo de início da execução
+start_time = time.time()
 
-# Define o número total de partes em que a matriz resultado será dividida
-partes = P
-
-# Define o nome dos arquivos que serão gerados
-arquivos = [f'threads_parte_{i+1}.txt' for i in range(partes)]
-
-P = partes//P
-# Cria as threads para executar a multiplicação
-for i in range(0, partes, P):
-    t0 = time.time()
-    inicio, fim = i, i+P
-    if fim > partes:
-        fim = partes
-    arquivo = arquivos[i//P]
-    t = threading.Thread(target=multiplica_parte, args=(M1, M2, q, inicio, fim, P))
+for i in range(p):
+    end_index = start_index + chunk_size if i < p - 1 else result.size
+    t = MultiplicationThread(i, m1, m2, result, p, start_index, end_index)
     threads.append(t)
+    start_index = end_index
+
+# Calcula o tempo de término da execução
+end_time = time.time()
+
+# Inicia as threads
+for t in threads:
     t.start()
 
-# Espera todas as threads terminarem
+# Espera as threads terminarem
 for t in threads:
     t.join()
 
-# Salva os resultados em arquivos separados
-print(arquivos)
-for i in range(partes):
-    M3 = q.get()
-    with open(arquivos[i], "w") as f:
-        f.write(f"{n1} {m2}\n")
-        for i in range(len(M3)):
-            for j in range(len(M3[0])):
-                f.write(f"c{i+1}{j+1} {M3[i][j]}\n")
-        f.write(f'{time.time()-t0:.3f}')
+# Salva a matriz resultante em um arquivo de texto
+# Cria o arquivo de texto para a matriz resultante
+with open("threads_M3.txt", "w") as f:
+    f.write(f"{result.shape[0]} {result.shape[1]}\n")
+    for i in range(result.shape[0]):
+        for j in range(result.shape[1]):
+            # f.write(f"c{i+1}{j+1} {result[i][j]}\n")
+            f.write(f"c{i+1}{j+1} {result[i][j].astype(int)}\n")
+    # Escreve o tempo total gasto no final do arquivo de texto
+    f.write(f"{end_time - start_time:.5f}")
 
-print("Multiplicação de matrizes concluída") 
+# Imprime a matriz resultante
+print(result)
